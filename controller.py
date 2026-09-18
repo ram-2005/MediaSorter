@@ -3,6 +3,8 @@ import shutil
 from dotenv import load_dotenv
 from pathlib import Path
 
+from MetadataExtractor import videoExtractor, photoExtractor
+
 load_dotenv()
 
 # loading the required directories
@@ -17,6 +19,16 @@ video_extensions = {".mp4", ".mov", ".avi", ".mkv", ".3gp"}
 count = 0
 
 for file in unsoted_dir.iterdir():
+
+    if file.suffix in image_extensions:
+        print(photoExtractor(file))
+
+    elif file.suffix in video_extensions:
+        print(videoExtractor(file))
+
+    else:
+        print("ERRORRRRRRRRRRRRRRRRRRRRRR")
+
 
     count += 1
 
