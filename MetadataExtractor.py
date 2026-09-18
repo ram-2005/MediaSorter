@@ -2,23 +2,63 @@
 from PIL import Image
 from PIL.ExifTags import TAGS
 from datetime import datetime
+from pymediainfo import MediaInfo
 
 
 def imageExtractor(dir):
 
+    #Opening the file and extracting the metadata
     image = Image.open(dir)
     exif = image.getexif()
 
+    #Iterating through all the metadata
     for tag_id, value in exif.items():
         tag = TAGS.get(tag_id, tag_id)
 
+        #Selecting the needed metadata which is Date and Time
         if tag == "DateTime":
 
-            date_taken = datetime.strptime(value,"%Y:%m:%d %H:%M:%S")
-            print(date_taken.year, date_taken.month)
+            #Pushing the DateTime into Modifier
+            dateModifier(value)
 
+
+
+
+
+def videoExtractor(dir):
+
+    #Opening the video file and extracting the metadata
+    video = MediaInfo.parse(dir)
+
+    #Iterating through the metadata
+    for track in video.tracks:
+        data = track.to_data()
+        for key,value in data.items():
+
+            #Finding the Date and time metadata
+            if key == "encoded_date":
+                if track.track_type == 'General':
+
+                    #Pushing the DateTime into Modifier
+                    value = value.replace("UTC", "")#The output of this function has a UTC at end whic we dont want
+                    value = value.replace("-", ":")#The output of this function has a - instead of : so we are replacing it
+                    value = value.strip()#removing the trailing space
+
+                    dateModifier(value)
+
+
+
+
+
+def dateModifier(value):
+
+    #The given datetime will be a string thus converting to usable format
+    date_taken = datetime.strptime(value,"%Y:%m:%d %H:%M:%S")
+
+    #returing the values in a list [year, month]
+    return [date_taken.year, date_taken.month]
 
 
 #__main__
 
-imageExtractor("/mnt/shared/COLD/Media/Photos/unsorted/sample/IMG_20230630_130901_363.jpg")
+videoExtractor("/mnt/shared/COLD/Media/Photos/unsorted/sample/VID_20230328_175244.mp4")
