@@ -3,7 +3,7 @@ import shutil
 from dotenv import load_dotenv
 from pathlib import Path
 
-from MetadataExtractor import videoExtractor, photoExtractor
+from MetadataExtractor import videoExtractor, imageExtractor
 
 load_dotenv()
 
@@ -21,7 +21,7 @@ count = 0
 for file in unsoted_dir.iterdir():
 
     if file.suffix in image_extensions:
-        print(photoExtractor(file))
+        print(type(imageExtractor(file)[1]))
 
     elif file.suffix in video_extensions:
         print(videoExtractor(file))
