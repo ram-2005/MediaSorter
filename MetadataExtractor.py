@@ -1,72 +1,85 @@
-#importing the necessary libraries
+from datetime import datetime
+
 from PIL import Image
 from PIL.ExifTags import TAGS
-from datetime import datetime
 from pymediainfo import MediaInfo
 
 
 
-'''
-Function to
-Extract the metadata of a Image
-'''
-def imageExtractor(dir):
+def date_modifier(value):
+    """
+    Convert a metadata date string into [year, month].
+    """
 
-    #Opening the file and extracting the metadata
-    image = Image.open(dir)
-    exif = image.getexif()
+    value = value.replace("UTC","")
+    value = value.replace("-",":")
+    value = value.strip()
 
-    #Iterating through all the metadata
-    for tag_id, value in exif.items():
-        tag = TAGS.get(tag_id, tag_id)
+    date_taken = datetime.strptime(
+            value,
+            "%Y:%m:%d %H:%M:%S"
+    )
 
-        #Selecting the needed metadata which is Date and Time
-        if tag == "DateTime":
-
-            #Pushing the DateTime into Modifier
-            return dateModifier(value)
+    return date_taken.year, date_taken.month
 
 
 
+def image_extractor(file_path):
+    """
+    Extract the capture date from an image.
 
-'''
-Function to Extract the
-metadata of a Video
-'''
-def videoExtractor(dir):
+    Returns:
+        tuple[int, int] | None
+        (year, month) if available, otherwise None.
+    """
 
-    #Opening the video file and extracting the metadata
-    video = MediaInfo.parse(dir)
+    with Image.open(file_path) as image:
 
-    #Iterating through the metadata
+        exif = image.getexif()
+
+        for tag_id, value in exif.items():
+
+            tag = TAGS.get(tag_id, tag_id)
+
+            if tag == "DateTimeOriginal":
+                return date_modifier(value)
+
+        #Fallback
+        for tag_id, value in exif.items():
+
+            tag = TAGS.get(tag_id, tag_id)
+
+            if tag == "DateTime":
+                return date_modifier(value)
+
+    return None
+
+
+
+def video_extractor(file_path):
+    """
+    Extract the encoded date from a video
+
+    Returns:
+        tuple[int, int] | None:
+        (year, month) if available, otherwise None.
+    """
+
+    video = MediaInfo.parse(file_path)
+
     for track in video.tracks:
+
+        if track.track_type != "General":
+            continue
+
         data = track.to_data()
-        for key,value in data.items():
 
-            #Finding the Date and time metadata
-            if key == "encoded_date":
-                if track.track_type == 'General':
+        value = data.get("encoded_date")
 
-                    #Pushing the DateTime into Modifier
-                    value = value.replace("UTC", "")#The output of this function has a UTC at end whic we dont want
-                    value = value.replace("-", ":")#The output of this function has a - instead of : so we are replacing it
-                    value = value.strip()#removing the trailing space
+        if value:
+            return date_modifier(value)
 
-                    return dateModifier(value)
+    return None
 
-
-
-
-'''
-Function to Extract the details
-that we need from the metadata
-'''
-def dateModifier(value):
-
-    #The given datetime will be a string thus converting to usable format
-    date_taken = datetime.strptime(value,"%Y:%m:%d %H:%M:%S")
-
-    #returing the values in a list [year, month]
-    return [date_taken.year, date_taken.month]
 
 
