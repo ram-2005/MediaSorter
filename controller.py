@@ -51,7 +51,7 @@ class SortResult:
 
 
 
-def main():
+def main(progress_callback=None):
 
     files_scanned = 0
     files_sorted = 0
@@ -68,9 +68,10 @@ def main():
 
         files_scanned += 1
 
-        extension = file.suffix.lower()
 
         try:
+
+            extension = file.suffix.lower()
 
             if extension in IMAGE_EXTENSIONS:
 
@@ -78,15 +79,22 @@ def main():
 
                 if date is None:
                     files_skipped += 1
-                    continue
 
-                year, month = date
+                else:
+                    year, month = date
 
-                directory_created = move_image_file(
-                        file,
-                        year,
-                        month
-                )
+                    directory_created = move_image_file(
+                            file,
+                            year,
+                            month
+                    )
+
+                    files_sorted += 1
+
+                    if directory_created:
+                        directories_created += 1
+
+                    sorted_files.append(file)
 
             elif extension in VIDEO_EXTENSIONS:
 
@@ -94,27 +102,26 @@ def main():
 
                 if date is None:
                     files_skipped += 1
-                    continue
 
-                year, month = date
+                else:
+                    year, month = date
 
-                directory_created = move_video_file(
-                        file,
-                        year,
-                        month
-                )
+                    directory_created = move_video_file(
+                            file,
+                            year,
+                            month
+                    )
+
+                    files_sorted += 1
+
+                    if directory_created:
+                        directories_created += 1
+
+                    sorted_files.append(file)
 
             else:
 
                 files_skipped += 1
-                continue
-
-            files_sorted += 1
-
-            if directory_created:
-                directories_created += 1
-
-            sorted_files.append(file)
 
         except Exception as error:
 
@@ -125,6 +132,18 @@ def main():
 
             raise
 
+        finally:
+
+            if progress_callback:
+                progress_callback(
+                    files_scanned,
+                    files_sorted,
+                    files_skipped,
+                    files_failed,
+                    directories_created,
+                    file
+                )
+
     return SortResult(
         files_scanned = files_scanned,
         files_sorted = files_sorted,
@@ -134,17 +153,29 @@ def main():
         sorted_files = sorted_files
     )
 
+def delete_sorted_files(sorted_files):
+    """
+    Delete only files that were successfully copied.
+    """
+
+    deleted = 0
+    failed = 0
+
+    for file in sorted_files:
+
+        try:
+            file.unlink()
+            deleted += 1
+
+        except OSError as error:
+            failed += 1
+            print(
+                    f"Failed to delete {file}: {error}"
+                    )
+
+        return deleted, failed
+
 
 if __name__ == "__main__":
-    result = main()
-
-    print()
-    print("Sorting complete.")
-    print()
-    print(f"Files scanned:      {result.files_scanned}")
-    print(f"Files sorted:       {result.files_sorted}")
-    print(f"Files skipped:      {result.files_skipped}")
-    print(f"Files failed:       {result.files_failed}")
-    print(f"Directories created:{result.directories_created}")
-
+    main()
 
