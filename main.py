@@ -59,6 +59,7 @@ def main():
         failed=0,
         directories_created=0,
         current_file="Preparing...",
+        total_bytes=0,
     )
 
     # --------------------------------
@@ -77,6 +78,7 @@ def main():
             failed,
             directories_created,
             file,
+            total_bytes,
         ):
             """
             Called by the controller after each file.
@@ -97,6 +99,7 @@ def main():
                     failed=failed,
                     directories_created=directories_created,
                     current_file=file.name,
+                    total_bytes = total_bytes
                 )
             )
 

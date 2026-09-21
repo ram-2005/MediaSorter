@@ -69,6 +69,7 @@ def create_dashboard(
     failed,
     directories_created,
     current_file,
+    total_bytes,
 ):
     """
     Create the live sorting dashboard.
@@ -108,6 +109,11 @@ def create_dashboard(
     stats.add_row(
         "Directories created",
         str(directories_created),
+    )
+
+    stats.add_row(
+        "Bytes Transfered",
+        str(total_bytes),
     )
 
     current_file_panel = Panel(

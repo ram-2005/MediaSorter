@@ -48,6 +48,7 @@ class SortResult:
     files_failed: int
     directories_created: int
     sorted_files: list
+    total_bytes: str
 
 
 
@@ -58,6 +59,7 @@ def main(progress_callback=None):
     files_skipped = 0
     files_failed = 0
     directories_created = 0
+    byte = 0
 
     sorted_files = []
 
@@ -89,6 +91,8 @@ def main(progress_callback=None):
                             month
                     )
 
+                    byte += file.stat().st_size
+
                     files_sorted += 1
 
                     if directory_created:
@@ -112,6 +116,8 @@ def main(progress_callback=None):
                             month
                     )
 
+                    byte += file.stat().st_size
+
                     files_sorted += 1
 
                     if directory_created:
@@ -134,6 +140,8 @@ def main(progress_callback=None):
 
         finally:
 
+            total_bytes = format_size(byte)
+
             if progress_callback:
                 progress_callback(
                     files_scanned,
@@ -141,7 +149,8 @@ def main(progress_callback=None):
                     files_skipped,
                     files_failed,
                     directories_created,
-                    file
+                    file,
+                    total_bytes
                 )
 
     return SortResult(
@@ -150,7 +159,8 @@ def main(progress_callback=None):
         files_skipped = files_skipped,
         files_failed = files_failed,
         directories_created = directories_created,
-        sorted_files = sorted_files
+        sorted_files = sorted_files,
+        total_bytes = total_bytes
     )
 
 def delete_sorted_files(sorted_files):
@@ -174,6 +184,18 @@ def delete_sorted_files(sorted_files):
                     )
 
     return deleted, failed
+
+
+
+def format_size(size):
+    units = ["B", "KB", "MB", "GB", "TB"]
+
+    for unit in units:
+        if size < 1024:
+            return f"{size:.2f} {unit}"
+        size /= 1024
+
+    return f"{size:.2f} PB"
 
 
 if __name__ == "__main__":

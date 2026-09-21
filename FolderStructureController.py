@@ -8,13 +8,9 @@ import os
 load_dotenv()
 
 
-unsorted_dir = Path(os.getenv("UNSORTED"))
+videos_dir = Path(os.getenv("VIDEOS"))
+image_dir = Path(os.getenv("PHOTOS"))
 
-#videos_dir = Path(os.getenv("VIDEOS"))
-#image_dir = Path(os.getenv("PHOTOS"))
-
-videos_dir = unsorted_dir / "test" / "videos"
-image_dir = unsorted_dir / "test" / "photos"
 
 
 
