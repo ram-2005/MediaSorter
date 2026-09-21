@@ -173,7 +173,7 @@ def delete_sorted_files(sorted_files):
                     f"Failed to delete {file}: {error}"
                     )
 
-        return deleted, failed
+    return deleted, failed
 
 
 if __name__ == "__main__":
